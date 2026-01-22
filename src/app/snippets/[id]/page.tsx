@@ -9,6 +9,8 @@ interface ComponentProps {
 }
 
 export default async function SnippetDetail(props: ComponentProps) {
+await new Promise((r) => setTimeout(r, 2000))
+
     const {id} = await props.params
 
     const snippet = await db.snippet.findFirst({
