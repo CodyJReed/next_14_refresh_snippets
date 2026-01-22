@@ -1,6 +1,6 @@
 import { db } from "@/db"
 import { notFound } from "next/navigation"
-
+import Link from "next/link"
 
 interface ComponentProps {
     params: {
@@ -9,17 +9,27 @@ interface ComponentProps {
 }
 
 export default async function SnippetDetail(props: ComponentProps) {
-await new Promise((r) => setTimeout(r, 2000))
+    await new Promise((r) => setTimeout(r, 2000))
 
-    const {id} = await props.params
+    const { id } = await props.params
 
     const snippet = await db.snippet.findFirst({
-        where: {id: parseInt(id)}
+        where: { id: parseInt(id) }
     })
 
     if (!snippet) return notFound()
 
     return <div>
-        {snippet.title}
+        <div className="flex m-4 justify-between items-center">
+            <h1 className="text-xl font-bold">{snippet.title}</h1>
+
+            <div className="flex gap-4">
+                <Link href={`/snippets/${snippet.id}/edit`} className="p-2 border rounded">Edit</Link>
+                <button className="p-2 border rounded">Delete</button>
+            </div>
+        </div>
+        <pre className="p-3 border rounded bg-gray-200 border-x-gray-200">
+            <code>{snippet.code}</code>
+        </pre>
     </div>
 }
