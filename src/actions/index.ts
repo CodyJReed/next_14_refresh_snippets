@@ -20,31 +20,44 @@ export async function deleteSnippet(id: number) {
     redirect('/')
 }
 
-export async function createSnippet(formState: {message: string}, formData: FormData) {
+export async function createSnippet(formState: { message: string }, formData: FormData) {
 
-    // retrieve and validate formData
-    const title = formData.get('title') as string
-    const code = formData.get('code') as string
+    try {
+        // retrieve and validate formData
+        const title = formData.get('title') as string
+        const code = formData.get('code') as string
 
-    if (typeof title !== 'string' || title.length < 3) {
+        if (typeof title !== 'string' || title.length < 3) {
+            return {
+                message: 'Title must be longer'
+            }
+        }
+
+        if (typeof code !== 'string' || code.length < 10) {
+            return {
+                message: 'Code must be longer'
+            }
+        }
+
+        // create new snippet
+        await db.snippet.create({
+            data: {
+                title,
+                code
+            }
+        })
+
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            return {
+                message: err.message
+            }
+        }
+
         return {
-            message: 'Title must be longer'
+            message: "Fsailed to save database"
         }
     }
-
-    if (typeof code !== 'string' || code.length < 10) {
-        return {
-            message: 'Code must be longer'
-        }
-    }
-
-    // create new snippet
-    const snippet = await db.snippet.create({
-        data: {
-            title,
-            code
-        }
-    })
-
     redirect("/")
+
 }
