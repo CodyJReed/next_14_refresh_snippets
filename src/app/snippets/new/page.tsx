@@ -1,29 +1,21 @@
-import { db } from "@/db"
-import { redirect } from "next/navigation";
+'use client'
+
+import { useActionState, startTransition } from "react"
+
+import * as actions from '@/actions'
+
 
 export default function SnippetCreatePage() {
-    async function createSnippet(formData: FormData) {
-        // needs to be a server action
-        'use server';
+    const [formState, action] = useActionState(actions.createSnippet, { message: '' })
 
-        // retrieve and validate formData
-        const title = formData.get('title') as string
-        const code = formData.get('code') as string
+    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault()
 
-        // create new snippet
-        const snippet = await db.snippet.create({
-            data: {
-                title,
-                code
-            }
-        })
-
-        console.log("snippet", snippet)
-
-        redirect("/")
+        const formData = new FormData(event.currentTarget)
+        startTransition(() => action(formData))
     }
 
-    return <form action={createSnippet}>
+    return <form onSubmit={handleSubmit}>
         <h3 className="font-bold m-3">Create a Snippet</h3>
         <div className="flex flex-col gap-4">
             <div className="flex gap-4">
@@ -44,6 +36,12 @@ export default function SnippetCreatePage() {
                     type="textarea"
                 />
             </div>
+
+            {formState.message ? (
+                <div className="my-2 p-2 bg-red-200 border rounded border-red-400">
+                    {formState.message}
+                </div>
+            ) : null}
 
             <button type="submit" className="border rounded p-2 bg-blue-200">Create</button>
 
